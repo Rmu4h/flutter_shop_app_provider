@@ -43,6 +43,8 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         _isLoading = true;
       });
       print('did work');
+
+      //old way to fetch, better way use FutureBuilder as like in ordersScreen page because builder run only one time
       Provider.of<Products>(context).fetchAndSetProducts().then((value) {
         _isLoading = false;
       });
@@ -53,6 +55,8 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('build prod screen works');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('MyShop'),

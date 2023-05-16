@@ -26,6 +26,38 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
+  Future<void> fetchAndSetOrders() async {
+    final url = Uri.parse(
+        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/orders.json');
+
+    final response = await http.get(url);
+    final List<OrderItem> loadedOrders = [];
+    print('extracred Data ${json.decode(response.body)}');
+    if(json.decode(response.body) == null) {
+      return;
+    }
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+
+    print('status code ${response.statusCode}');
+    extractedData.forEach((orderId, orderData) {
+      loadedOrders.add(OrderItem(
+          id: orderId,
+          amount: orderData['amount'],
+          products: (orderData['products'] as List<dynamic>)
+              .map((item) => CartItem(
+                  id: item['id'],
+                  title: item['title'],
+                  quantity: item['quantity'],
+                  price: item['price']))
+              .toList(),
+          dateTime: DateTime.parse(orderData['dateTime'])));
+    });
+
+    _orders = loadedOrders.reversed.toList();
+    notifyListeners();
+    print('this is response orders  ${json.decode(response.body)}');
+  }
+
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final url = Uri.parse(
         'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/orders.json');
