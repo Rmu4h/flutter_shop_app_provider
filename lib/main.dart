@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_shop_app_provider/providers/cart.dart';
 import 'package:flutter_shop_app_provider/providers/orders.dart';
 import 'package:flutter_shop_app_provider/providers/products.dart';
+import 'package:flutter_shop_app_provider/screens/auth_screen.dart';
 import 'package:flutter_shop_app_provider/screens/cart_screen.dart';
 import 'package:flutter_shop_app_provider/screens/edit_product_screen.dart';
 import 'package:flutter_shop_app_provider/screens/product_detail_screen.dart';
@@ -49,7 +50,8 @@ class MyApp extends StatelessWidget {
           //   ),
           fontFamily: 'Lato',
         ),
-        home: ProductsOverviewScreen(),
+        // home: ProductsOverviewScreen(),
+        home: const AuthScreen(),
         routes: {
           ProductDetailScreen.routeName: (ctx) => const ProductDetailScreen(),
           CartScreen.routeName: (ctx) => const CartScreen(),
