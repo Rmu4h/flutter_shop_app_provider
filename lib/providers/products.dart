@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'product.dart';
 
 class Products with ChangeNotifier {
+  //this property should never be accessible outside
   List<Product> _items = [
     // Product(
     //   id: 'p1',
@@ -41,6 +42,11 @@ class Products with ChangeNotifier {
     // ),
   ];
 
+  final String? authToken;
+  final String? userId;
+
+  Products(this.authToken, this.userId, this._items);
+
   List<Product> get items {
     return [..._items];
   }
@@ -54,8 +60,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    final url = Uri.parse(
-        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products.json');
+    var url = Uri.parse(
+        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=$authToken');
     try {
       final response = await http.get(url);
       print(json.decode(response.body));
@@ -63,6 +69,11 @@ class Products with ChangeNotifier {
       if(json.decode(response.body) == null) {
         return;
       }
+
+      url =  Uri.parse(
+          'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/userFavorites/$userId.json?auth=$authToken');
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       extractedData.forEach((prodId, prodData) {
         print('this is prodId - ${prodId}');
@@ -72,20 +83,20 @@ class Products with ChangeNotifier {
             title: prodData['title'],
             description: prodData['description'],
             price: prodData['price'],
+            isFavorite: favoriteData == null ? false : favoriteData[prodId] ?? false,
             imageUrl: prodData['imageUrl'],
-            isFavorite: prodData['isFavourite'],
         ));
       });
       _items = loadedProducts;
       notifyListeners();
     } catch (error) {
-      throw error;
+      rethrow;
     }
   }
 
   Future<void> addProduct(Product product) async {
     final url = Uri.parse(
-        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products.json');
+        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=$authToken');
 
     try {
       final response = await http.post(url,
@@ -121,7 +132,7 @@ class Products with ChangeNotifier {
 
     if (prodIndex >= 0) {
       final url = Uri.parse(
-          'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+          'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json?auth=$authToken');
       await http.patch(url, body: json.encode({
         'title': newProduct.title,
         'description': newProduct.description,
@@ -138,7 +149,7 @@ class Products with ChangeNotifier {
 
   // https://www.visitdubai.com/-/media/gathercontent/article/t/top-rides-at-img-worlds-of-adventure/media/top-rides-at-img-worlds-of-adventure-predator-5.jpg
   Future<void> deleteProduct(String id) async {
-    final url = Uri.parse('https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+    final url = Uri.parse('https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json?auth=$authToken');
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
     Product? existingProduct = _items[existingProductIndex];
 

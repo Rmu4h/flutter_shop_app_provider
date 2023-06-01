@@ -1,6 +1,11 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/auth.dart';
+import '../models/http_exception.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -21,16 +26,16 @@ class AuthScreen extends StatelessWidget {
             decoration: BoxDecoration(
                 gradient: LinearGradient(
               colors: [
-                Color.fromRGBO(215, 117, 255, 1).withOpacity(0.5),
-                Color.fromRGBO(255, 188, 117, 1).withOpacity(0.9),
+                const Color.fromRGBO(215, 117, 255, 1).withOpacity(0.5),
+                const Color.fromRGBO(255, 188, 117, 1).withOpacity(0.9),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              stops: [0, 1],
+              stops: const [0, 1],
             )),
           ),
           SingleChildScrollView(
-            child: Container(
+            child: SizedBox(
               height: deviceSize.height,
               width: deviceSize.width,
               child: Column(
@@ -86,11 +91,28 @@ class AuthCard extends StatefulWidget {
 class _AuthCardState extends State<AuthCard> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Login;
-  Map<String, String> _authData = {'email': '', 'password': ''};
+  final Map<String, String> _authData = {'email': '', 'password': ''};
   bool _isLoading = false;
-  final _passwordcontroller = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  void _submit() {
+  void _showErrorDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('An Error Occurred'),
+          content: Text(message),
+          actions: [
+            TextButton(onPressed: (){
+              Navigator.of(context).pop();
+            }, child: const Text('Okay'))
+          ],
+        ));
+  }
+
+  void _submit() async {
+    print('submit work');
+    print('AuthMode.Login ${AuthMode.Login}');
+
     if (_formKey.currentState!.validate()) {
       return;
     }
@@ -98,10 +120,38 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      //Log user in
-    } else {
-      //Sign user up
+
+    try {
+      if (_authMode == AuthMode.Login) {
+        //Log user in
+        await Provider.of<Auth>(context, listen: false)
+            .login(_authData['email']!, _authData['password']!);
+      } else {
+        //Sign user up
+        await Provider.of<Auth>(context, listen: false)
+            .signup(_authData['email']!, _authData['password']!);
+      }
+
+    } on HttpException catch (error) {
+      print('on HttpException catch work');
+      var errorMessage = 'Authentication failed';
+      if (error.toString().contains('EMAIL_EXIST')) {
+        errorMessage = 'This email address is already in use';
+      } else if (error.toString().contains('INVALID_EMAIL')) {
+        errorMessage = 'This email is not valid';
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
+        errorMessage = 'Password is too weak';
+      } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage = 'Could not find a user with that email';
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
+        errorMessage = 'Invalid password';
+      }
+      _showErrorDialog(errorMessage);
+
+    } catch (error) {
+      const errorMessage = 'Could not authenticate you. Please ty again later';
+      _showErrorDialog(errorMessage);
+
     }
     setState(() {
       _isLoading = false;
@@ -133,7 +183,7 @@ class _AuthCardState extends State<AuthCard> {
         constraints:
             BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
         width: deviseSize.width * 0.75,
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -171,17 +221,17 @@ class _AuthCardState extends State<AuthCard> {
                     obscureText: true,
                     validator: _authMode == AuthMode.Signup
                         ? (value) {
-                            if (value != _passwordcontroller.text) {
+                            if (value != _passwordController.text) {
                               return 'Passwords do not match!';
                             }
                           }
                         : null,
                   ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 if (_isLoading)
-                  CircularProgressIndicator()
+                  const CircularProgressIndicator()
                 else
                   ElevatedButton(
                     onPressed: _submit,
@@ -203,7 +253,8 @@ class _AuthCardState extends State<AuthCard> {
                   style: ButtonStyle(
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     padding: MaterialStateProperty.all(
-                      const EdgeInsets.symmetric(horizontal: 30.0, vertical: 4.0),
+                      const EdgeInsets.symmetric(
+                          horizontal: 30.0, vertical: 4.0),
                     ),
                   ),
                 )
