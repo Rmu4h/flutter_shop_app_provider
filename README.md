@@ -1,4 +1,4 @@
-# todo test task
+# Shop app
 
 What was implemented:
 1. Download a list of orders,products,userFavorites from the server using firebase and display them on the screen.
