@@ -1,16 +1,17 @@
-# flutter_shop_app_provider
+# todo test task
 
-A new Flutter project.
+What was implemented:
+1. Download a list of orders,products,userFavorites from the server using firebase and display them on the screen.
+2. Create and edit products and upload them to the server,
+3. Implemented authorization page using validation, animation etc. Also save user data locally using shared_preferences and used this for Auto Login
+4. Implemented products overview page, orders screen, manage page screen. 
+5. Filter products by favorites
+6. Work with errors, exceptions
+7. Use animations
 
-## Getting Started
+Technology stack:
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. DART
+2. FLUTTER
+3. Provider state management
+4. Firebase server
