@@ -30,10 +30,6 @@ class MyApp extends StatelessWidget {
         ),
         //provider Products rebuild if provider Auth change
         ChangeNotifierProxyProvider<Auth, Products>(
-            // builder: (ctx, auth, previousProducts) => Products(
-            //   auth.token,
-            //   auth.userId,
-            //   previousProducts == null ? [] : previousProducts.items),
             create: (context) => Products('', '', []),
             update: (context, auth, previousProducts) => Products(
                 auth.token,
@@ -56,18 +52,12 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             colorScheme: ColorScheme.fromSwatch().copyWith(
               primary: Colors.purple,
-              // secondary: const Color(0xFF0A2A3F),
               secondary: Colors.blue,
             ),
-            // buttonTheme: ButtonThemeData(
-            //   buttonColor: const Color(0xffff914d), // Background color (orange in my case).
-            //   textTheme: ButtonTextTheme.accent,
-            //   ),
             fontFamily: 'Lato',
           ),
-          // home: ProductsOverviewScreen(),
           home: auth.isAuth
-              ? ProductsOverviewScreen()
+              ? const ProductsOverviewScreen()
               : FutureBuilder(
                   future: auth.tryAutoLogin(),
                   builder: (context, authResultSnapshot) =>
@@ -76,7 +66,6 @@ class MyApp extends StatelessWidget {
                           ? const SplashScreen()
                           : const AuthScreen(),
                 ),
-          // home: EditProductScreen(),
           routes: {
             ProductDetailScreen.routeName: (ctx) => const ProductDetailScreen(),
             CartScreen.routeName: (ctx) => const CartScreen(),

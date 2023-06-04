@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_shop_app_provider/providers/product.dart';
 import 'package:provider/provider.dart';
 
@@ -45,7 +43,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   @override
   void didChangeDependencies() {
-    print('did change dep');
     if (_isInit) {
       final productId = ModalRoute.of(context)?.settings.arguments as String?;
 
@@ -56,7 +53,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
           'title': _editedProduct.title,
           'description': _editedProduct.description,
           'price': _editedProduct.price.toString(),
-          // 'imageUrl': _editedProduct.imageUrl,
           'imageUrl': '',
         };
 
@@ -91,7 +87,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
   }
 
-  Future<void> _saveForm() async {
+  Future<void> _saveForm(BuildContext context) async {
     final isValid = _formKey.currentState?.validate();
 
     if (!isValid!) {
@@ -108,12 +104,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     } else {
       try{
-        print('try save form work');
 
         await Provider.of<Products>(context, listen: false)
             .addProduct(_editedProduct);
       } catch(error){
-        print('catch save form work');
         await showDialog(context: context, builder: (context) => AlertDialog(
           title: const Text('An error occurred'),
           content: const Text('Something went wrong'),
@@ -126,20 +120,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
           ],
         ));
       }
-      // finally {
-      //   print('finally save form work');
-      //
-      //   //код який запускається в не залежності чи успішний try or catch
-      //   setState(() {
-      //     _isLoading= false;
-      //   });
-      //   Navigator.of(context).pop();
-      // }
     }
     setState(() {
       _isLoading = false;
     });
-    Navigator.of(context).pop();
+    if(context.mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -150,7 +135,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed: _saveForm,
+            onPressed: () => _saveForm(context),
           ),
         ],
       ),
@@ -186,8 +171,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             price: _editedProduct.price,
                             imageUrl: _editedProduct.imageUrl);
 
-                        print('onSaved pr ${_editedProduct}');
-                        print('onSaved pr ${_editedProduct.title}');
                       },
                     ),
                     TextFormField(
@@ -220,7 +203,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             price: double.parse(value!),
                             imageUrl: _editedProduct.imageUrl);
                       },
-                      // focusNode: _priceFucusNode,
                     ),
                     TextFormField(
                       initialValue: _initValues['description'],
@@ -277,7 +259,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           controller: _imageUrlController,
                           focusNode: _imageUrlFocusNode,
                           onFieldSubmitted: (_) {
-                            _saveForm();
+                            _saveForm(context);
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {

@@ -5,18 +5,16 @@ import 'package:flutter_shop_app_provider/widgets/badge.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/cart.dart';
-import '../providers/product.dart';
 import '../providers/products.dart';
-import '../widgets/product_item.dart';
 import '../widgets/products_grid.dart';
 
 enum FilterOptions {
-  Favorites,
-  All,
+  favorites,
+  all,
 }
 
 class ProductsOverviewScreen extends StatefulWidget {
-  ProductsOverviewScreen({Key? key}) : super(key: key);
+  const ProductsOverviewScreen({Key? key}) : super(key: key);
 
   @override
   State<ProductsOverviewScreen> createState() => _ProductsOverviewScreenState();
@@ -27,14 +25,6 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _isInit = true;
   var _isLoading = false;
 
-  // @override
-  // void initState() {
-  //   print('init work');
-  //   // TODO: implement initState
-  //   Provider.of<Products>(context, listen: false).fetchAndSetProducts();
-  //   super.initState();
-  // }
-
   @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
@@ -42,7 +32,6 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
       setState(() {
         _isLoading = true;
       });
-      print('did work');
 
       //old way to fetch, better way use FutureBuilder as like in ordersScreen page because builder run only one time
       Provider.of<Products>(context).fetchAndSetProducts().then((value) {
@@ -55,8 +44,6 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('build prod screen works');
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('MyShop'),
@@ -64,7 +51,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           PopupMenuButton(
               onSelected: (FilterOptions selectedValue) {
                 setState(() {
-                  if (selectedValue == FilterOptions.Favorites) {
+                  if (selectedValue == FilterOptions.favorites) {
                     _showOnlyFavorites = true;
                   } else {
                     _showOnlyFavorites = false;
@@ -76,11 +63,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               ),
               itemBuilder: (_) => [
                     const PopupMenuItem(
-                      value: FilterOptions.Favorites,
+                      value: FilterOptions.favorites,
                       child: Text('Only Favorites'),
                     ),
                     const PopupMenuItem(
-                      value: FilterOptions.All,
+                      value: FilterOptions.all,
                       child: Text('Show All'),
                     ),
                   ]),

@@ -7,13 +7,7 @@ import '../providers/cart.dart';
 import '../providers/product.dart';
 
 class ProductItem extends StatelessWidget {
-  // final String id;
-  // final String title;
-  // final String imageUrl;
-  //
-  // const ProductItem(
-  //     {Key? key, required this.id, required this.title, required this.imageUrl})
-  //     : super(key: key);
+  const ProductItem({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +40,12 @@ class ProductItem extends StatelessWidget {
             onPressed: () {
               cart.addItem(product.id!, product.title, product.price);
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Added item to cart!'),
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'UNDO', onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: const Text('Added item to cart!'),
+                duration: const Duration(seconds: 2),
+                action: SnackBarAction(
+                    label: 'UNDO',
+                    onPressed: () {
                       cart.removeSingleItem(product.id);
                     }),
               ));

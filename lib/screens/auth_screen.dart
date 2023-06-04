@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -7,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth.dart';
 import '../models/http_exception.dart';
 
-enum AuthMode { Signup, Login }
+enum AuthMode { signUp, login }
 
 class AuthScreen extends StatelessWidget {
   static const routeName = '/auth';
@@ -17,7 +16,6 @@ class AuthScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
-    // final transformConfig = Matrix4.rotationZ(-8 * pi /180);
 
     return Scaffold(
       body: Stack(
@@ -70,7 +68,8 @@ class AuthScreen extends StatelessWidget {
                     ),
                   )),
                   Flexible(
-                      flex: deviceSize.width > 600 ? 2 : 1, child: AuthCard())
+                      flex: deviceSize.width > 600 ? 2 : 1,
+                      child: const AuthCard())
                 ],
               ),
             ),
@@ -88,15 +87,16 @@ class AuthCard extends StatefulWidget {
   State<AuthCard> createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin {
+class _AuthCardState extends State<AuthCard>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  AuthMode _authMode = AuthMode.Login;
+  AuthMode _authMode = AuthMode.login;
   final Map<String, String> _authData = {'email': '', 'password': ''};
   bool _isLoading = false;
   final _passwordController = TextEditingController();
   var containerHeight = 260;
   late AnimationController _controller;
-  // late Animation<Size> _heightAnimation;
+
   late Animation<Offset> _slideAnimation;
   late Animation<double> _opacityAnimation;
 
@@ -105,13 +105,14 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
     // TODO: implement initState
 
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -1.5),
-      end: const Offset(0,0)).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
+            begin: const Offset(0, -1.5), end: const Offset(0, 0))
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
 
-    _opacityAnimation = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-    // _heightAnimation.addListener(()=> setState(() {}));
+    _opacityAnimation = Tween(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
   }
 
   @override
@@ -125,20 +126,19 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('An Error Occurred'),
-          content: Text(message),
-          actions: [
-            TextButton(onPressed: (){
-              Navigator.of(context).pop();
-            }, child: const Text('Okay'))
-          ],
-        ));
+              title: const Text('An Error Occurred'),
+              content: Text(message),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Okay'))
+              ],
+            ));
   }
 
   void _submit() async {
-    print('submit work');
-    print('AuthMode.Login ${AuthMode.Login}');
-
     if (_formKey.currentState!.validate()) {
       return;
     }
@@ -148,7 +148,7 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
     });
 
     try {
-      if (_authMode == AuthMode.Login) {
+      if (_authMode == AuthMode.login) {
         //Log user in
         await Provider.of<Auth>(context, listen: false)
             .login(_authData['email']!, _authData['password']!);
@@ -157,9 +157,7 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
         await Provider.of<Auth>(context, listen: false)
             .signup(_authData['email']!, _authData['password']!);
       }
-
     } on HttpException catch (error) {
-      print('on HttpException catch work');
       var errorMessage = 'Authentication failed';
       if (error.toString().contains('EMAIL_EXIST')) {
         errorMessage = 'This email address is already in use';
@@ -173,11 +171,9 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
         errorMessage = 'Invalid password';
       }
       _showErrorDialog(errorMessage);
-
     } catch (error) {
       const errorMessage = 'Could not authenticate you. Please ty again later';
       _showErrorDialog(errorMessage);
-
     }
     setState(() {
       _isLoading = false;
@@ -185,14 +181,14 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
   }
 
   void _switchAuthMode() {
-    if (_authMode == AuthMode.Login) {
+    if (_authMode == AuthMode.login) {
       setState(() {
-        _authMode = AuthMode.Signup;
+        _authMode = AuthMode.signUp;
       });
       _controller.forward();
     } else {
       setState(() {
-        _authMode = AuthMode.Login;
+        _authMode = AuthMode.login;
       });
       _controller.reverse();
     }
@@ -209,11 +205,9 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
-
-        height: _authMode == AuthMode.Signup ? 320 : 260,
-        // height: _heightAnimation.value.height,
+        height: _authMode == AuthMode.signUp ? 320 : 260,
         constraints:
-            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
+            BoxConstraints(minHeight: _authMode == AuthMode.signUp ? 320 : 260),
         width: deviseSize.width * 0.75,
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -228,6 +222,7 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
                     if (value == null || value.isEmpty || value.contains('@')) {
                       return 'Invalid email';
                     }
+                    return null;
                   },
                   onSaved: (value) {
                     _authData['email'] = value!;
@@ -240,35 +235,38 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
                     if (value == null || value.isEmpty || value.length < 5) {
                       return 'Password is too short';
                     }
+                    return null;
                   },
                   onSaved: (value) {
                     _authData['password'] = value!;
                   },
                 ),
-                // if (_authMode == AuthMode.Signup)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    constraints: BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 60 : 0, maxHeight:  _authMode == AuthMode.Signup ? 120 : 0),
-                    child: FadeTransition(
-                      opacity: _opacityAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: TextFormField(
-                          enabled: _authMode == AuthMode.Signup,
-                          decoration:
-                          const InputDecoration(labelText: 'Confirm Password'),
-                          obscureText: true,
-                          validator: _authMode == AuthMode.Signup
-                              ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match!';
-                            }
-                          }
-                              : null,
-                        ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  constraints: BoxConstraints(
+                      minHeight: _authMode == AuthMode.signUp ? 60 : 0,
+                      maxHeight: _authMode == AuthMode.signUp ? 120 : 0),
+                  child: FadeTransition(
+                    opacity: _opacityAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: TextFormField(
+                        enabled: _authMode == AuthMode.signUp,
+                        decoration: const InputDecoration(
+                            labelText: 'Confirm Password'),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.signUp
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                }
+                                return null;
+                              }
+                            : null,
                       ),
                     ),
                   ),
+                ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -286,12 +284,10 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
                           color: Theme.of(context).primaryColor,
                         )),
                     child:
-                        Text(_authMode == AuthMode.Login ? 'LOGIN' : 'SIGH UP'),
+                        Text(_authMode == AuthMode.login ? 'LOGIN' : 'SIGH UP'),
                   ),
                 TextButton(
                   onPressed: _switchAuthMode,
-                  child: Text(
-                      '${_authMode == AuthMode.Login ? 'SIGNUP' : 'LOGIN'} INSTED'),
                   style: ButtonStyle(
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     padding: MaterialStateProperty.all(
@@ -299,6 +295,8 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
                           horizontal: 30.0, vertical: 4.0),
                     ),
                   ),
+                  child: Text(
+                      '${_authMode == AuthMode.login ? 'SIGNUP' : 'LOGIN'} INSTEAD'),
                 )
               ],
             ),

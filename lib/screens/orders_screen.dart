@@ -38,7 +38,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
         body: FutureBuilder(
           future: _ordersListFuture,
           builder: (context, dataSnapshot) {
-
             if (dataSnapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else {
@@ -49,10 +48,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
               } else {
                 return Consumer<Orders>(
                   builder: (context, orderData, child) => ListView.builder(
-                    itemCount: orderData.orders.length,
-                    itemBuilder: (context, index) {
-                      return OrderItem(orderData.orders[index]);
-                    }),);
+                      itemCount: orderData.orders.length,
+                      itemBuilder: (context, index) {
+                        return OrderItem(orderData.orders[index]);
+                      }),
+                );
               }
             }
           },
