@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -9,7 +8,7 @@ class Product with ChangeNotifier {
   final String description;
   final double price;
   final String imageUrl;
-  bool isFavorite ;
+  bool isFavorite;
 
   Product(
       {required this.id,
@@ -32,17 +31,16 @@ class Product with ChangeNotifier {
 
     final url = Uri.parse(
         'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/userFavorites/$userId/$id.json?auth=$authToken');
-    try{
-      final response = await http.put(url, body: json.encode(
-        isFavorite,
-      ));
-      print('status code ${response.statusCode}');
+    try {
+      final response = await http.put(url,
+          body: json.encode(
+            isFavorite,
+          ));
       //check if error
-      if(response.statusCode >= 400){
+      if (response.statusCode >= 400) {
         _setFavouriteValue(oldStatus);
       }
-    }catch(error){
-      print('catch work');
+    } catch (error) {
       _setFavouriteValue(oldStatus);
     }
   }

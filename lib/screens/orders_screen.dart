@@ -30,9 +30,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('building works');
-
-    // final orderData = Provider.of<Orders>(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text('Your Orders'),
@@ -41,19 +38,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
         body: FutureBuilder(
           future: _ordersListFuture,
           builder: (context, dataSnapshot) {
-            // Widget ordersList;
-            //
-            // if(dataSnapshot.connectionState == ConnectionState.done) {
-            //   ordersList =  ListView.builder(
-            //       itemCount: orderData.orders.length,
-            //       itemBuilder: (context, index) {
-            //         return OrderItem(orderData.orders[index]);
-            //       });
-            // } else if (dataSnapshot.hasError){
-            //   ordersList = Center(child: Text('Error: ${dataSnapshot.error}'),);
-            // } else {
-            //   ordersList = const CircularProgressIndicator();
-            // }
 
             if (dataSnapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

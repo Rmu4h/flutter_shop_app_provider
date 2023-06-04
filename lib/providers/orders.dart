@@ -25,7 +25,6 @@ class Orders with ChangeNotifier {
 
   Orders(this.authToken, this._orders);
 
-
   List<OrderItem> get orders {
     return [..._orders];
   }
@@ -36,13 +35,11 @@ class Orders with ChangeNotifier {
 
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
-    print('extracred Data ${json.decode(response.body)}');
-    if(json.decode(response.body) == null) {
+    if (json.decode(response.body) == null) {
       return;
     }
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
 
-    print('status code ${response.statusCode}');
     extractedData.forEach((orderId, orderData) {
       loadedOrders.add(OrderItem(
           id: orderId,
@@ -59,7 +56,6 @@ class Orders with ChangeNotifier {
 
     _orders = loadedOrders.reversed.toList();
     notifyListeners();
-    print('this is response orders  ${json.decode(response.body)}');
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {

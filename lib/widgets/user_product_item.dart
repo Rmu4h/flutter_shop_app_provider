@@ -19,7 +19,7 @@ class UserProductItem extends StatelessWidget {
       leading: CircleAvatar(
         backgroundImage: NetworkImage(imageUrl),
       ),
-      trailing: Container(
+      trailing: SizedBox(
         width: 100,
         child: Row(
           children: [
@@ -27,8 +27,7 @@ class UserProductItem extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pushNamed(EditProductScreen.routeName, arguments: id);
               },
-              icon: const Icon(Icons.edit),
-              color: Theme.of(context).primaryColor,
+              icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary,),
             ),
             IconButton(
                 onPressed: () async {
@@ -39,7 +38,7 @@ class UserProductItem extends StatelessWidget {
                   }
                 },
                 icon: const Icon(Icons.delete),
-                color: Theme.of(context).errorColor),
+                color: Theme.of(context).colorScheme.error),
           ],
         ),
       ),

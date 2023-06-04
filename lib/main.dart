@@ -7,8 +7,9 @@ import 'package:flutter_shop_app_provider/screens/auth_screen.dart';
 import 'package:flutter_shop_app_provider/screens/cart_screen.dart';
 import 'package:flutter_shop_app_provider/screens/edit_product_screen.dart';
 import 'package:flutter_shop_app_provider/screens/product_detail_screen.dart';
-import 'package:flutter_shop_app_provider/screens/products_overview_screen.dart';
-import 'package:flutter_shop_app_provider/screens/user_products_screen.dart';
+import './screens/products_overview_screen.dart';
+import './screens/splash_screen.dart';
+import './screens/user_products_screen.dart';
 import 'package:provider/provider.dart';
 import './screens/orders_screen.dart';
 
@@ -25,28 +26,28 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
-            value: Auth(),
+          value: Auth(),
         ),
         //provider Products rebuild if provider Auth change
         ChangeNotifierProxyProvider<Auth, Products>(
-          // builder: (ctx, auth, previousProducts) => Products(
-          //   auth.token,
-          //   auth.userId,
-          //   previousProducts == null ? [] : previousProducts.items),
-            create: (context) => Products('','', []),
+            // builder: (ctx, auth, previousProducts) => Products(
+            //   auth.token,
+            //   auth.userId,
+            //   previousProducts == null ? [] : previousProducts.items),
+            create: (context) => Products('', '', []),
             update: (context, auth, previousProducts) => Products(
                 auth.token,
                 auth.userId,
-                previousProducts == null ? [] : previousProducts.items)
-        ),
+                previousProducts == null ? [] : previousProducts.items)),
         ChangeNotifierProvider(
           //всі інстанси дітей будуть мати можливість слухати цей продактс. Але при цьому не перебудовувати весь MaterialApp
-          create:(context) => Cart(),
+          create: (context) => Cart(),
         ),
         ChangeNotifierProxyProvider<Auth, Orders>(
           create: (context) => Orders('', []),
           //всі інстанси дітей будуть мати можливість слухати цей продактс. Але при цьому не перебудовувати весь MaterialApp
-          update: (context, auth, previousOrders) => Orders(auth.token, previousOrders == null ? [] : previousOrders.orders),
+          update: (context, auth, previousOrders) => Orders(
+              auth.token, previousOrders == null ? [] : previousOrders.orders),
         ),
       ],
       child: Consumer<Auth>(
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSwatch().copyWith(
               primary: Colors.purple,
               // secondary: const Color(0xFF0A2A3F),
-              secondary: Colors.deepOrange,
+              secondary: Colors.blue,
             ),
             // buttonTheme: ButtonThemeData(
             //   buttonColor: const Color(0xffff914d), // Background color (orange in my case).
@@ -65,7 +66,16 @@ class MyApp extends StatelessWidget {
             fontFamily: 'Lato',
           ),
           // home: ProductsOverviewScreen(),
-          home: auth.isAuth ? ProductsOverviewScreen() : const AuthScreen(),
+          home: auth.isAuth
+              ? ProductsOverviewScreen()
+              : FutureBuilder(
+                  future: auth.tryAutoLogin(),
+                  builder: (context, authResultSnapshot) =>
+                      authResultSnapshot.connectionState ==
+                              ConnectionState.waiting
+                          ? const SplashScreen()
+                          : const AuthScreen(),
+                ),
           // home: EditProductScreen(),
           routes: {
             ProductDetailScreen.routeName: (ctx) => const ProductDetailScreen(),

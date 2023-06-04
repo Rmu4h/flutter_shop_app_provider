@@ -7,40 +7,7 @@ import 'product.dart';
 
 class Products with ChangeNotifier {
   //this property should never be accessible outside
-  List<Product> _items = [
-    // Product(
-    //   id: 'p1',
-    //   title: 'Red Shirt',
-    //   description: 'A red shirt - it is pretty red!',
-    //   price: 29.99,
-    //   imageUrl:
-    //       'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    // ),
-    // Product(
-    //   id: 'p2',
-    //   title: 'Trousers',
-    //   description: 'A nice pair of trousers.',
-    //   price: 59.99,
-    //   imageUrl:
-    //       'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
-    // ),
-    // Product(
-    //   id: 'p3',
-    //   title: 'Yellow Scarf',
-    //   description: 'Warm and cozy - exactly what you need for the winter.',
-    //   price: 19.99,
-    //   imageUrl:
-    //       'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    // ),
-    // Product(
-    //   id: 'p4',
-    //   title: 'A Pan',
-    //   description: 'Prepare any meal you want.',
-    //   price: 49.99,
-    //   imageUrl:
-    //       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    // ),
-  ];
+  List<Product> _items = [];
 
   final String? authToken;
   final String? userId;
@@ -59,32 +26,33 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  Future<void> fetchAndSetProducts() async {
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+
     var url = Uri.parse(
-        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=$authToken');
+        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=$authToken&$filterString');
     try {
       final response = await http.get(url);
-      print(json.decode(response.body));
       final List<Product> loadedProducts = [];
-      if(json.decode(response.body) == null) {
+      if (json.decode(response.body) == null) {
         return;
       }
 
-      url =  Uri.parse(
+      url = Uri.parse(
           'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/userFavorites/$userId.json?auth=$authToken');
       final favoriteResponse = await http.get(url);
       final favoriteData = json.decode(favoriteResponse.body);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       extractedData.forEach((prodId, prodData) {
-        print('this is prodId - ${prodId}');
-        print('this is prodId - ${prodData}');
         loadedProducts.add(Product(
-            id: prodId,
-            title: prodData['title'],
-            description: prodData['description'],
-            price: prodData['price'],
-            isFavorite: favoriteData == null ? false : favoriteData[prodId] ?? false,
-            imageUrl: prodData['imageUrl'],
+          id: prodId,
+          title: prodData['title'],
+          description: prodData['description'],
+          price: prodData['price'],
+          isFavorite:
+              favoriteData == null ? false : favoriteData[prodId] ?? false,
+          imageUrl: prodData['imageUrl'],
         ));
       });
       _items = loadedProducts;
@@ -105,6 +73,7 @@ class Products with ChangeNotifier {
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
+            'creatorId': userId,
             'isFavourite': product.isFavorite,
           }));
       final newProduct = Product(
@@ -119,11 +88,9 @@ class Products with ChangeNotifier {
 
       notifyListeners();
     } catch (error) {
-      print('catch error work');
       //коли ми обробляємо помилки апка не крашиться
-      print(error);
       //throw  створює еррор щоб його можна було обробляти далі
-      throw error;
+      rethrow;
     }
   }
 
@@ -133,12 +100,13 @@ class Products with ChangeNotifier {
     if (prodIndex >= 0) {
       final url = Uri.parse(
           'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json?auth=$authToken');
-      await http.patch(url, body: json.encode({
-        'title': newProduct.title,
-        'description': newProduct.description,
-        'imageUrl': newProduct.imageUrl,
-        'price': newProduct.price,
-      }));
+      await http.patch(url,
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'imageUrl': newProduct.imageUrl,
+            'price': newProduct.price,
+          }));
 
       _items[prodIndex] = newProduct;
       notifyListeners();
@@ -147,9 +115,9 @@ class Products with ChangeNotifier {
     }
   }
 
-  // https://www.visitdubai.com/-/media/gathercontent/article/t/top-rides-at-img-worlds-of-adventure/media/top-rides-at-img-worlds-of-adventure-predator-5.jpg
   Future<void> deleteProduct(String id) async {
-    final url = Uri.parse('https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json?auth=$authToken');
+    final url = Uri.parse(
+        'https://flutter-shop-app-provider-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json?auth=$authToken');
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
     Product? existingProduct = _items[existingProductIndex];
 
@@ -157,23 +125,12 @@ class Products with ChangeNotifier {
     notifyListeners();
     final response = await http.delete(url);
 
-    if(response.statusCode >= 400) {
+    if (response.statusCode >= 400) {
       _items.insert(existingProductIndex, existingProduct!);
       notifyListeners();
       throw HttpException('Could not delete product.');
     }
 
     existingProduct = null;
-
-    // http.delete(url).then((response) {
-    //   if(response.statusCode >= 400){
-    //     throw HttpException('Could not delete product.');
-    //   }
-    //   existingProduct = null;
-    // }).catchError((_){
-    //   print('catch error work');
-    //
-    // });
-
   }
 }

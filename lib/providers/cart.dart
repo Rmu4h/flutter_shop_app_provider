@@ -6,16 +6,16 @@ class CartItem {
   final int quantity;
   final double price;
 
-  CartItem({required this.id,
-    required this.title,
-    required this.quantity,
-    required this.price});
+  CartItem(
+      {required this.id,
+      required this.title,
+      required this.quantity,
+      required this.price});
 }
 
 class Cart with ChangeNotifier {
   Map<String, CartItem> _items = {};
 
-  //розібратись нахуя це робиться
   Map<String, CartItem> get items {
     return {..._items};
   }
@@ -39,22 +39,19 @@ class Cart with ChangeNotifier {
       // change quantity...
       _items.update(
           productId,
-              (existingCartItem) =>
-              CartItem(
-                  id: existingCartItem.id,
-                  title: existingCartItem.title,
-                  quantity: existingCartItem.quantity + 1,
-                  price: existingCartItem.price)
-      );
+          (existingCartItem) => CartItem(
+              id: existingCartItem.id,
+              title: existingCartItem.title,
+              quantity: existingCartItem.quantity + 1,
+              price: existingCartItem.price));
     } else {
       _items.putIfAbsent(
           productId,
-              () =>
-              CartItem(
-                  id: DateTime.now().toString(),
-                  title: title,
-                  quantity: 1,
-                  price: price));
+          () => CartItem(
+              id: DateTime.now().toString(),
+              title: title,
+              quantity: 1,
+              price: price));
     }
 
     notifyListeners();
@@ -70,9 +67,12 @@ class Cart with ChangeNotifier {
       return;
     }
 
-    if (_items[productId]?.quantity != null && _items[productId]!.quantity > 1) {
-      _items.update(productId, (existingCartItem) =>
-          CartItem(id: existingCartItem.id,
+    if (_items[productId]?.quantity != null &&
+        _items[productId]!.quantity > 1) {
+      _items.update(
+          productId,
+          (existingCartItem) => CartItem(
+              id: existingCartItem.id,
               title: existingCartItem.title,
               quantity: existingCartItem.quantity - 1,
               price: existingCartItem.price));

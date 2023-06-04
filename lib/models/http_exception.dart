@@ -1,5 +1,3 @@
-
-
 class HttpException implements Exception {
   final String message;
 
@@ -10,6 +8,5 @@ class HttpException implements Exception {
   String toString() {
     // TODO: implement toString
     return message;
-    return super.toString();
   }
 }
